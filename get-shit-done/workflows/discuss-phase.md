@@ -105,6 +105,13 @@ Phase: "API documentation"
 - Scope (roadmap defines this)
 </gray_area_identification>
 
+<answer_validation>
+**IMPORTANT: Answer validation** — After every AskUserQuestion call, check if the response is empty or whitespace-only. If so:
+1. Retry the question once with the same parameters
+2. If still empty, present the options as a plain-text numbered list and ask the user to type their choice number
+Never proceed with an empty answer.
+</answer_validation>
+
 <process>
 
 **Express path available:** If you already have a PRD or acceptance criteria document, use `/gsd:plan-phase {phase} --prd path/to/prd.md` to skip this discussion and go straight to planning.
