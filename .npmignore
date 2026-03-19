@@ -1,0 +1,23 @@
+# Dev/CI files
+.github/
+.git/
+.gitignore
+
+# Tests
+tests/
+
+# Scratch/templates source only
+scratch/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docs not needed at runtime
+CONTRIBUTING.md
