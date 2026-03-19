@@ -336,7 +336,17 @@ If research file not found, warn but continue: "Research agent did not produce o
 
 ---
 
-**Step 5: Spawn planner (quick mode)**
+**Step 5: Plan the quick task**
+
+<runtime_detection>
+**Detect runtime before planning:**
+- If `Task` tool is available (Claude Code, Cursor): use subagent spawning below
+- If `Task` tool is NOT available (Antigravity, Gemini CLI, Codex): skip to **Step 5-ALT** (inline execution)
+
+**How to detect:** Check your available tools. If you have `view_file`, `grep_search`, `find_by_name`, `write_to_file`, `run_command` but NOT `Task` — you are on Antigravity/Gemini. Use inline mode.
+</runtime_detection>
+
+**Step 5 (Task mode — Claude Code, Cursor):**
 
 **If `$FULL_MODE`:** Use `quick-full` mode with stricter constraints.
 
@@ -385,9 +395,152 @@ Return: ## PLANNING COMPLETE with plan path
 After planner returns:
 1. Verify plan exists at `${QUICK_DIR}/${quick_id}-PLAN.md`
 2. Extract plan count (typically 1 for quick tasks)
-3. Report: "Plan created: ${QUICK_DIR}/${quick_id}-PLAN.md"
+3. Report: "Plan created: `${QUICK_DIR}/${quick_id}-PLAN.md`"
 
 If plan not found, error: "Planner failed to create ${quick_id}-PLAN.md"
+
+**Skip to Step 5.5 (plan-checker) →**
+
+---
+
+**Step 5-ALT: Inline planning (Antigravity / no Task tool)**
+
+When `Task` tool is unavailable, perform ALL steps inline. This is more token-efficient
+for quick tasks since no subagent context overhead is incurred.
+
+**5-ALT-a: Gather context**
+
+Read these files (use `view_file`):
+- `.planning/STATE.md` — Current project state
+- `.planning/PROJECT.md` — Project context, core value, requirements
+- `./GEMINI.md` or `./CLAUDE.md` — Project instructions (if exists)
+- If `$DISCUSS_MODE`: `${QUICK_DIR}/${quick_id}-CONTEXT.md` — User decisions (locked)
+- If `$RESEARCH_MODE`: `${QUICK_DIR}/${quick_id}-RESEARCH.md` — Research findings
+
+Check `.gemini/antigravity/skills/` or `.agent/skills/` for project skills.
+
+**5-ALT-b: Analyze what needs to change**
+
+Using the task description and gathered context:
+1. Identify which files need to be created/modified (use `find_by_name` + `grep_search`)
+2. Read existing files that will be modified (use `view_file`)
+3. Determine dependencies between changes
+
+**Analysis Paralysis Guard:** Max 5 read/search calls before you start writing the plan.
+
+**5-ALT-c: Write the plan**
+
+Create `${QUICK_DIR}/${quick_id}-PLAN.md` using `write_to_file` with this structure:
+
+```markdown
+---
+phase: quick-${quick_id}
+plan: 01
+type: quick
+wave: 1
+autonomous: true
+files_modified:
+  - [file1]
+  - [file2]
+must_haves:
+  truths:
+    - "[Observable truth 1]"
+    - "[Observable truth 2]"
+  artifacts:
+    - path: "[file]"
+      provides: "[what it does]"
+---
+
+<objective>
+[What this plan achieves — 2-3 sentences]
+</objective>
+
+<context>
+[Key context from STATE.md and PROJECT.md that informs implementation]
+</context>
+
+<tasks>
+
+<task type="auto">
+  <name>Task 1: [specific action]</name>
+  <files>[files to create/modify]</files>
+  <read_first>[existing files to understand first]</read_first>
+  <action>
+    [Specific implementation instructions]
+    [Include anti-patterns with WHY]
+  </action>
+  <verify>
+    <automated>[Command to verify, < 60 seconds]</automated>
+  </verify>
+  <done>[What "done" looks like — observable, not subjective]</done>
+</task>
+
+</tasks>
+```
+
+Report: "Plan created: `${QUICK_DIR}/${quick_id}-PLAN.md`"
+
+**5-ALT-d: Execute inline (replaces Step 6)**
+
+Read the plan you just wrote. For each `<task>`:
+
+1. **Read first:** Read all files listed in `<read_first>`
+2. **Execute:** Follow `<action>` instructions — create/modify files
+3. **Verify:** Run the `<automated>` verification command
+4. **Commit atomically:**
+   ```bash
+   git add [specific files from <files>]
+   git commit -m "feat(quick-${quick_id}): [task name]"
+   ```
+5. **If verify fails:** Apply deviation rules:
+   - Rule 1: Bug → auto-fix (max 3 attempts)
+   - Rule 2: Missing critical functionality → auto-add
+   - Rule 3: Blocking issue → auto-fix
+   - Rule 4: Architectural change → STOP, ask user
+
+**5-ALT-e: Create SUMMARY.md (replaces Step 6)**
+
+Write `${QUICK_DIR}/${quick_id}-SUMMARY.md`:
+
+```markdown
+---
+phase: quick-${quick_id}
+plan: 01
+status: complete
+tasks_completed: [N]/[N]
+---
+
+## Summary
+
+[What was built — 2-3 sentences]
+
+## Tasks Completed
+
+| # | Task | Status | Commit |
+|---|------|--------|--------|
+| 1 | [name] | ✓ | [hash] |
+
+## Key Files
+
+### Created
+- `[file]` — [purpose]
+
+### Modified
+- `[file]` — [what changed]
+
+## Deviations
+[Any deviations from plan, or "None"]
+```
+
+**Self-check:** Verify files exist and commits are real:
+```bash
+git log --oneline -5
+ls -la [created files]
+```
+
+Report completion, then **skip to Step 7** (update STATE.md).
+
+
 
 ---
 
