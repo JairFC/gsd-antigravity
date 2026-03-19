@@ -236,7 +236,7 @@ Execute each wave in sequence. Within a wave: parallel if `PARALLELIZATION=true`
        - .planning/PROJECT.md (Project context)
        - .planning/STATE.md (State)
        - .planning/config.json (Config, if exists)
-       - ./CLAUDE.md (Project instructions, if exists)
+       - ./CLAUDE.md or ./GEMINI.md (Project instructions, if exists)
        </files_to_read>
 
        <success_criteria>

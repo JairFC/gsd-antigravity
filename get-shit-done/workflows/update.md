@@ -146,14 +146,14 @@ Proceed to install step (treat as version 0.0.0 for comparison).
 Check npm for latest version:
 
 ```bash
-npm view get-shit-done-cc version 2>/dev/null
+npm view @jairnx/gsd-antigravity version 2>/dev/null
 ```
 
 **If npm check fails:**
 ```
 Couldn't check for updates (offline or npm unavailable).
 
-To update manually: `npx get-shit-done-cc --global`
+To update manually: `npx @jairnx/gsd-antigravity --antigravity --global`
 ```
 
 Exit.
@@ -228,7 +228,7 @@ Your custom files in other locations are preserved:
 - Custom commands not in `commands/gsd/` ✓
 - Custom agents not prefixed with `gsd-` ✓
 - Custom hooks ✓
-- Your CLAUDE.md files ✓
+- Your CLAUDE.md / GEMINI.md files ✓
 
 If you've modified any GSD files directly, they'll be automatically backed up to `gsd-local-patches/` and can be reapplied with `/gsd:reapply-patches` after the update.
 ```
@@ -252,17 +252,17 @@ RUNTIME_FLAG="--$TARGET_RUNTIME"
 
 **If LOCAL install:**
 ```bash
-npx -y get-shit-done-cc@latest "$RUNTIME_FLAG" --local
+npx -y @jairnx/gsd-antigravity@latest --antigravity --local
 ```
 
 **If GLOBAL install:**
 ```bash
-npx -y get-shit-done-cc@latest "$RUNTIME_FLAG" --global
+npx -y @jairnx/gsd-antigravity@latest --antigravity --global
 ```
 
 **If UNKNOWN install:**
 ```bash
-npx -y get-shit-done-cc@latest --claude --global
+npx -y @jairnx/gsd-antigravity@latest --antigravity --global
 ```
 
 Capture output. If install fails, show error and exit.

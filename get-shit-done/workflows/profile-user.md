@@ -334,8 +334,8 @@ Use AskUserQuestion with multiSelect:
 - question: "Which artifacts should I generate?"
 - options (ALL pre-selected by default):
   - "/gsd:dev-preferences command file" -- "Load your preferences in any session"
-  - "CLAUDE.md profile section" -- "Add profile to this project's CLAUDE.md"
-  - "Global CLAUDE.md" -- "Add profile to $HOME/.claude/CLAUDE.md for all projects"
+  - "Project instructions profile" -- "Add profile to this project's CLAUDE.md or GEMINI.md"
+  - "Global profile" -- "Add profile to project instructions file for all projects"
 
 **If no artifacts selected:** Display "No artifacts generated. Your profile is saved at $HOME/.claude/get-shit-done/USER-PROFILE.md" and jump to step 10.
 
@@ -353,21 +353,21 @@ node $HOME/.claude/get-shit-done/bin/gsd-tools.cjs generate-dev-preferences --an
 
 Display: "✓ Generated /gsd:dev-preferences at $HOME/.claude/commands/gsd/dev-preferences.md"
 
-**For CLAUDE.md profile section (if selected):**
+**For project instructions profile section (if selected):**
 
 ```bash
 node $HOME/.claude/get-shit-done/bin/gsd-tools.cjs generate-claude-profile --analysis "$ANALYSIS_PATH" --json 2>/dev/null
 ```
 
-Display: "✓ Added profile section to CLAUDE.md"
+Display: "✓ Added profile section to project instructions"
 
-**For Global CLAUDE.md (if selected):**
+**For Global profile (if selected):**
 
 ```bash
 node $HOME/.claude/get-shit-done/bin/gsd-tools.cjs generate-claude-profile --analysis "$ANALYSIS_PATH" --global --json 2>/dev/null
 ```
 
-Display: "✓ Added profile section to $HOME/.claude/CLAUDE.md"
+Display: "✓ Added profile section to global project instructions"
 
 **Error handling:** If any gsd-tools.cjs call fails, display the error message and use AskUserQuestion to offer "Retry" or "Skip this artifact". On retry, re-run the command. On skip, continue to next artifact.
 
@@ -411,8 +411,8 @@ Then list paths for each generated artifact:
 ```
 Artifacts:
   ✓ /gsd:dev-preferences   $HOME/.claude/commands/gsd/dev-preferences.md
-  ✓ CLAUDE.md section       ./CLAUDE.md
-  ✓ Global CLAUDE.md        $HOME/.claude/CLAUDE.md
+  ✓ Project instructions     ./CLAUDE.md or ./GEMINI.md
+  ✓ Global profile           $HOME/.gemini/antigravity/ (or $HOME/.claude/)
 ```
 
 (Only show artifacts that were actually generated.)
