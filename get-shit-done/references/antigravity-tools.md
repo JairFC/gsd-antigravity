@@ -49,3 +49,49 @@ When executing GSD workflows on Antigravity, use these tool equivalences:
 GSD workflows reference `./CLAUDE.md` for project-specific instructions.
 On Antigravity, also check for `./GEMINI.md` as an alternative.
 The content is the same — project guidelines, coding conventions, etc.
+
+## Parallel Tool Calls (Speed Optimization)
+
+Antigravity supports **parallel tool execution** — multiple tools called in the same turn run simultaneously if they have no data dependencies.
+
+### Rules
+1. **Independent calls → parallel.** If call B doesn't need the output of call A, call both in the same turn.
+2. **Dependent calls → sequential.** If call B needs data from call A's result, wait for A first.
+3. **No limit on parallel calls.** You can call 5+ tools in one turn.
+
+### Pattern: Parallel Context Loading
+Instead of reading files one at a time:
+```
+# SLOW — 5 sequential round trips
+view_file(PROJECT.md)    → wait → view_file(STATE.md) → wait → view_file(ROADMAP.md) → ...
+```
+Load all context simultaneously:
+```
+# FAST — 1 round trip for all 5
+view_file(PROJECT.md)     ← parallel
+view_file(STATE.md)       ← parallel
+view_file(ROADMAP.md)     ← parallel
+view_file(config.json)    ← parallel
+view_file(GEMINI.md)      ← parallel
+```
+
+### Pattern: Parallel Research
+Web searches for independent topics:
+```
+search_web("Go microservice patterns")     ← parallel
+search_web("PostgreSQL connection pooling") ← parallel
+search_web("Docker multi-stage builds")    ← parallel
+```
+
+### Pattern: Parallel File Writes
+Writing independent output files:
+```
+write_to_file(.planning/research/STACK.md)        ← parallel
+write_to_file(.planning/research/FEATURES.md)     ← parallel
+write_to_file(.planning/research/ARCHITECTURE.md) ← parallel
+```
+
+### When NOT to Parallelize
+- **Task execution within a plan** — tasks may depend on files created by prior tasks
+- **Git commits** — must be sequential (each commit depends on prior state)
+- **File reads → file edits** — need to read content before editing it

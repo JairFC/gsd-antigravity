@@ -767,47 +767,49 @@ Commit after writing.
 
 ### Inline Research (Antigravity / no Task tool)
 
-When `Task` tool is unavailable, perform all research sequentially inline.
-This is more token-efficient since no subagent context loading is needed.
+When `Task` tool is unavailable, perform research inline using **parallel tool calls** where possible.
+Antigravity allows multiple independent tool calls in the same turn — exploit this for speed.
 
 **Tools to use:** `search_web` for domain research, `view_file` for project context, `write_to_file` for outputs.
 
-**Analysis Paralysis Guard:** Max 3 search calls per dimension. Write the file, then move to next dimension.
+**Analysis Paralysis Guard:** Max 3 search calls per dimension. Write the file, then move on.
 
-Read `.planning/PROJECT.md` to understand the project domain, then:
+**Step A — Parallel context loading:**
+Call these simultaneously (no dependencies between them):
+```
+view_file(.planning/PROJECT.md)     ← parallel
+view_file(.planning/config.json)    ← parallel
+view_file(./GEMINI.md or CLAUDE.md) ← parallel (if exists)
+```
 
-**Dimension 1: Stack** → `.planning/research/STACK.md`
+**Step B — Parallel research (batch 1):**
+Call these `search_web` simultaneously — they research independent dimensions:
+```
+search_web("[domain] technology stack best practices 2024-2025")   ← parallel (Dimension 1: Stack)
+search_web("[domain] core features table stakes vs differentiators") ← parallel (Dimension 2: Features)
+```
 
-Research the standard technology stack for [domain]:
-- Use `search_web` to find current best practices, frameworks, libraries
-- Be prescriptive: specific libraries with versions, rationale for each choice
-- Include what NOT to use and why
-- Write `.planning/research/STACK.md` with sections: Language, Framework, Database, Infrastructure, Key Libraries
+**Step C — Parallel research (batch 2):**
+```
+search_web("[domain] system architecture component boundaries")     ← parallel (Dimension 3: Architecture)
+search_web("[domain] common mistakes pitfalls prevention")          ← parallel (Dimension 4: Pitfalls)
+```
 
-**Dimension 2: Features** → `.planning/research/FEATURES.md`
+**Step D — Write all research files (can be parallel):**
+```
+write_to_file(.planning/research/STACK.md)        ← parallel
+write_to_file(.planning/research/FEATURES.md)     ← parallel
+write_to_file(.planning/research/ARCHITECTURE.md) ← parallel
+write_to_file(.planning/research/PITFALLS.md)     ← parallel
+```
 
-Research what features [domain] products typically have:
-- Categorize: Table stakes (must have) vs Differentiators (competitive advantage) vs Anti-features (deliberately don't build)
-- Note complexity and dependencies between features
-- Write `.planning/research/FEATURES.md`
+Format per dimension:
+- **Stack:** Language, Framework, Database, Infrastructure, Key Libraries (with versions). What NOT to use.
+- **Features:** Table stakes (must) vs Differentiators (advantage) vs Anti-features (don't build).
+- **Architecture:** Component boundaries, data flow, suggested build order.
+- **Pitfalls:** Specific mistakes, warning signs, prevention strategies.
 
-**Dimension 3: Architecture** → `.planning/research/ARCHITECTURE.md`
-
-Research how [domain] systems are typically structured:
-- Component boundaries (what talks to what)
-- Data flow direction
-- Suggested build order based on dependencies
-- Write `.planning/research/ARCHITECTURE.md`
-
-**Dimension 4: Pitfalls** → `.planning/research/PITFALLS.md`
-
-Research common mistakes in [domain] projects:
-- Specific pitfalls (not generic advice)
-- Warning signs for each
-- Prevention strategies
-- Write `.planning/research/PITFALLS.md`
-
-**Synthesize** → `.planning/research/SUMMARY.md`
+**Step E — Synthesize** → `.planning/research/SUMMARY.md`
 
 Read all 4 research docs, create a synthesis:
 - Key stack recommendation (1-2 sentences)

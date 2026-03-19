@@ -252,17 +252,28 @@ Execute each wave in sequence. Within a wave: parallel if `PARALLELIZATION=true`
 
    **Inline Execution path (Antigravity):**
    For each plan in the current wave, execute sequentially:
-   1. Read `~/.gemini/antigravity/get-shit-done/workflows/execute-plan.md` — follow it as your execution guide
-   2. Read the PLAN.md file for this plan using `view_file`
-   3. Read `.planning/PROJECT.md` and `.planning/STATE.md` for context
-   4. For each task in the plan:
-      a. Read files listed in `<read_first>` using `view_file`
+
+   **A. Parallel context loading** — call all simultaneously:
+   ```
+   view_file(~/.gemini/antigravity/get-shit-done/workflows/execute-plan.md) ← parallel
+   view_file({phase_dir}/{plan_file})                                        ← parallel
+   view_file(.planning/PROJECT.md)                                           ← parallel
+   view_file(.planning/STATE.md)                                             ← parallel
+   view_file(./GEMINI.md or ./CLAUDE.md)                                     ← parallel (if exists)
+   ```
+
+   **B. Sequential task execution** — for each task in the plan:
+      a. Read files listed in `<read_first>` using `view_file` (can be parallel if multiple)
       b. Execute the `<action>` using appropriate tools (`write_to_file`, `run_command`, etc.)
       c. Verify `<acceptance_criteria>` — use `grep_search`, `run_command`, or `view_file`
       d. Commit atomically: `git add [files] && git commit -m "feat(phase-{X}): [task description]"`
-   5. Create `{phase_dir}/{plan_id}-SUMMARY.md` with: tasks completed, files modified, key decisions
-   6. Update `.planning/STATE.md` with plan completion
-   7. Move to next plan in the wave
+
+   **C. Post-plan** — create summary and update state:
+   ```
+   write_to_file({phase_dir}/{plan_id}-SUMMARY.md)  ← parallel
+   replace_file_content(.planning/STATE.md)          ← parallel
+   ```
+   Then move to next plan in the wave
 
 3. **Wait for all agents in wave to complete.**
 
