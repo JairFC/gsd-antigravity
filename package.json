@@ -1,9 +1,9 @@
 {
-  "name": "get-shit-done-cc",
+  "name": "gsd-antigravity",
   "version": "1.26.0",
-  "description": "A meta-prompting, context engineering and spec-driven development system for Claude Code, OpenCode, Gemini and Codex by TÂCHES.",
+  "description": "GSD (Get Shit Done) optimized for Antigravity — meta-prompting, context engineering and spec-driven development. Based on get-shit-done-cc by TÂCHES.",
   "bin": {
-    "get-shit-done-cc": "bin/install.js"
+    "gsd-antigravity": "bin/install.js"
   },
   "files": [
     "bin",
@@ -14,26 +14,25 @@
     "scripts"
   ],
   "keywords": [
-    "claude",
-    "claude-code",
+    "antigravity",
+    "gsd",
     "ai",
     "meta-prompting",
     "context-engineering",
     "spec-driven-development",
     "gemini",
-    "gemini-cli",
-    "codex",
-    "codex-cli"
+    "claude",
+    "codex"
   ],
-  "author": "TÂCHES",
+  "author": "JairFC (fork) — Original by TÂCHES",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/glittercowboy/get-shit-done.git"
+    "url": "git+https://github.com/JairFC/gsd-antigravity.git"
   },
-  "homepage": "https://github.com/glittercowboy/get-shit-done",
+  "homepage": "https://github.com/JairFC/gsd-antigravity",
   "bugs": {
-    "url": "https://github.com/glittercowboy/get-shit-done/issues"
+    "url": "https://github.com/JairFC/gsd-antigravity/issues"
   },
   "engines": {
     "node": ">=20.0.0"
