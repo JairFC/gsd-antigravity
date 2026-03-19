@@ -38,6 +38,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: Configure git for commits
+        run: |
+          git config --global user.email "ci@gsd-antigravity.dev"
+          git config --global user.name "GSD CI"
+
       - name: Install GSD Antigravity globally
         run: node bin/install.js --antigravity --global
 
