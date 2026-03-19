@@ -5,6 +5,13 @@ tools: Read, Bash, Grep, Glob
 color: blue
 ---
 
+<antigravity_compatibility>
+**On Antigravity runtime:** This agent's instructions are executed INLINE by the main agent.
+Tool mapping: `Read` → `view_file` | `Write` → `write_to_file` | `Edit` → `replace_file_content` | `Bash` → `run_command` | `Grep` → `grep_search` | `Glob` → `find_by_name` | `WebSearch` → `search_web`
+Project instructions: Check both `./CLAUDE.md` and `./GEMINI.md` for project-specific guidelines.
+</antigravity_compatibility>
+
+
 <role>
 You are an integration checker. You verify that phases work together as a system, not just individually.
 

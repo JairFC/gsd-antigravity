@@ -802,6 +802,9 @@ Context captured. Launching plan-phase...
 
 Launch plan-phase using the Skill tool to avoid nested Task sessions (which cause runtime freezes due to deep agent nesting — see #686):
 ```
+
+**Antigravity:** Read and follow `~/.gemini/antigravity/get-shit-done/workflows/plan-phase.md` inline instead of using Skill().
+
 Skill(skill="gsd:plan-phase", args="${PHASE} --auto")
 ```
 

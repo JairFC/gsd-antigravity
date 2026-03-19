@@ -7,6 +7,8 @@ Read STATE.md before any operation to load project context.
 Read config.json for planning behavior settings.
 
 @~/.claude/get-shit-done/references/git-integration.md
+
+**Antigravity users:** Also read `~/.gemini/antigravity/get-shit-done/references/antigravity-tools.md` for tool mapping.
 </required_reading>
 
 <process>
@@ -68,6 +70,19 @@ grep -n "type=\"checkpoint" .planning/phases/XX-name/{phase}-{plan}-PLAN.md
 | Decision | C (main) | Execute entirely in main context |
 
 **Pattern A:** init_agent_tracking → spawn Task(subagent_type="gsd-executor", model=executor_model) with prompt: execute plan at [path], autonomous, all tasks + SUMMARY + commit, follow deviation/auth rules, report: plan name, tasks, SUMMARY path, commit hash → track agent_id → wait → update tracking → report.
+
+<runtime_check>
+**Antigravity (no Task tool):** Pattern A becomes sequential inline execution — follow steps below directly:
+1. Read the PLAN.md file completely
+2. For each task in order:
+   a. Read files in `<read_first>` using `view_file`
+   b. Execute `<action>` using appropriate tools (`write_to_file`, `run_command`, `replace_file_content`)
+   c. Verify `<acceptance_criteria>` using `grep_search`, `run_command`, or `view_file`
+   d. Commit: `git add [files] && git commit -m "{type}({phase}-{plan}): {description}"`
+3. Create SUMMARY.md (see create_summary step)
+4. Update STATE.md (see update_current_position step)
+All patterns (A/B/C) collapse to inline sequential in Antigravity.
+</runtime_check>
 
 **Pattern B:** Execute segment-by-segment. Autonomous segments: spawn subagent for assigned tasks only (no SUMMARY/commit). Checkpoints: main context. After all segments: aggregate, create SUMMARY, commit. See segment_execution.
 
@@ -135,7 +150,7 @@ If previous SUMMARY has unresolved "Issues Encountered" or "Next Phase Readiness
 Deviations are normal — handle via rules below.
 
 1. Read @context files from prompt
-2. **MCP tools:** If CLAUDE.md or project instructions reference MCP tools (e.g. jCodeMunch for code navigation), prefer them over Grep/Glob when available. Fall back to Grep/Glob if MCP tools are not accessible.
+2. **Tool selection:** Use your runtime's native tools. Antigravity: `view_file` for reading, `grep_search` for searching, `find_by_name` for file discovery, `run_command` for CLI commands. If CLAUDE.md or GEMINI.md references MCP tools, use them when available.
 3. Per task:
    - **MANDATORY read_first gate:** If the task has a `<read_first>` field, you MUST read every listed file BEFORE making any edits. This is not optional. Do not skip files because you "already know" what's in them — read them. The read_first files establish ground truth for the task.
    - `type="auto"`: if `tdd="true"` → TDD execution. Implement with deviation rules + auth gates. Verify done criteria. Commit (see task_commit). Track hash for Summary.
@@ -307,6 +322,8 @@ Display: `CHECKPOINT: [Type]` box → Progress {X}/{Y} → Task name → type-sp
 After response: verify if specified. Pass → continue. Fail → inform, wait. WAIT for user — do NOT hallucinate completion.
 
 See ~/.claude/get-shit-done/references/checkpoints.md for details.
+
+**Antigravity:** Checkpoints display as markdown output. Present options as a numbered list and wait for user reply.
 </step>
 
 <step name="checkpoint_return_for_orchestrator">

@@ -10,6 +10,16 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 </required_reading>
 
+<runtime_compatibility>
+**Antigravity users:** This workflow uses `Skill(skill="gsd:X")` to invoke other GSD workflows.
+On Antigravity, `Skill()` is not available. Instead:
+1. Read the referenced workflow file using `view_file`: `~/.gemini/antigravity/get-shit-done/workflows/{X}.md`
+2. Follow its instructions inline — you ARE the executor
+3. When the workflow completes, return to this file and continue
+
+The `Skill()` calls below are guidance — on Antigravity, treat them as "read and follow that workflow now."
+</runtime_compatibility>
+
 <process>
 
 <step name="initialize" priority="first">

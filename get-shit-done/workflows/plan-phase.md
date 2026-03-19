@@ -742,6 +742,9 @@ Plans ready. Launching execute-phase...
 
 Launch execute-phase using the Skill tool to avoid nested Task sessions (which cause runtime freezes due to deep agent nesting):
 ```
+
+**Antigravity:** Read and follow `~/.gemini/antigravity/get-shit-done/workflows/execute-phase.md` inline instead of using Skill().
+
 Skill(skill="gsd:execute-phase", args="${PHASE} --auto --no-transition")
 ```
 
