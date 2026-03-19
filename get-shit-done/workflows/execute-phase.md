@@ -12,6 +12,9 @@ Orchestrator coordinates, not executes. Each subagent loads the full execute-pla
 - **Copilot:** Uses `@gsd-executor` agent reference — if subagent spawning hangs or fails to return,
   fall back to **sequential inline execution**: read and follow execute-plan.md directly for each plan
   instead of spawning parallel agents. This is slower but reliable.
+- **Antigravity:** Task tool is NOT available. Always use **sequential inline execution**:
+  for each plan, read execute-plan.md workflow and follow it directly using `view_file`, `write_to_file`,
+  `run_command`, `grep_search`, etc. Execute plans one at a time, in wave order.
 - **Other runtimes (Gemini, Codex, OpenCode):** If Task/subagent API is unavailable, use sequential
   inline execution as the fallback.
 
@@ -195,6 +198,13 @@ Execute each wave in sequence. Within a wave: parallel if `PARALLELIZATION=true`
    For 200k models, this keeps orchestrator context lean (~10-15%).
    For 1M+ models (Opus 4.6, Sonnet 4.6), richer context can be passed directly.
 
+   <runtime_check>
+   **Check your runtime:**
+   - If `Task` tool is available → Use the Task call below
+   - If `Task` tool is NOT available (Antigravity) → Use "Inline Execution" below
+   </runtime_check>
+
+   **Subagent path:**
    ```
    Task(
      subagent_type="gsd-executor",
@@ -223,30 +233,36 @@ Execute each wave in sequence. Within a wave: parallel if `PARALLELIZATION=true`
        <files_to_read>
        Read these files at execution start using the Read tool:
        - {phase_dir}/{plan_file} (Plan)
-       - .planning/PROJECT.md (Project context — core value, requirements, evolution rules)
+       - .planning/PROJECT.md (Project context)
        - .planning/STATE.md (State)
        - .planning/config.json (Config, if exists)
-       - ./CLAUDE.md (Project instructions, if exists — follow project-specific guidelines and coding conventions)
-       - .claude/skills/ or .agents/skills/ (Project skills, if either exists — list skills, read SKILL.md for each, follow relevant rules during implementation)
+       - ./CLAUDE.md (Project instructions, if exists)
        </files_to_read>
-
-       <mcp_tools>
-       If CLAUDE.md or project instructions reference MCP tools (e.g. jCodeMunch, context7,
-       or other MCP servers), prefer those tools over Grep/Glob for code navigation when available.
-       MCP tools often save significant tokens by providing structured code indexes.
-       Check tool availability first — if MCP tools are not accessible, fall back to Grep/Glob.
-       </mcp_tools>
 
        <success_criteria>
        - [ ] All tasks executed
        - [ ] Each task committed individually
        - [ ] SUMMARY.md created in plan directory
        - [ ] STATE.md updated with position and decisions
-       - [ ] ROADMAP.md updated with plan progress (via `roadmap update-plan-progress`)
+       - [ ] ROADMAP.md updated with plan progress
        </success_criteria>
      "
    )
    ```
+
+   **Inline Execution path (Antigravity):**
+   For each plan in the current wave, execute sequentially:
+   1. Read `~/.gemini/antigravity/get-shit-done/workflows/execute-plan.md` — follow it as your execution guide
+   2. Read the PLAN.md file for this plan using `view_file`
+   3. Read `.planning/PROJECT.md` and `.planning/STATE.md` for context
+   4. For each task in the plan:
+      a. Read files listed in `<read_first>` using `view_file`
+      b. Execute the `<action>` using appropriate tools (`write_to_file`, `run_command`, etc.)
+      c. Verify `<acceptance_criteria>` — use `grep_search`, `run_command`, or `view_file`
+      d. Commit atomically: `git add [files] && git commit -m "feat(phase-{X}): [task description]"`
+   5. Create `{phase_dir}/{plan_id}-SUMMARY.md` with: tasks completed, files modified, key decisions
+   6. Update `.planning/STATE.md` with plan completion
+   7. Move to next plan in the wave
 
 3. **Wait for all agents in wave to complete.**
 
@@ -499,6 +515,13 @@ Use AskUserQuestion to present the options.
 <step name="verify_phase_goal">
 Verify phase achieved its GOAL, not just completed tasks.
 
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Spawn verifier subagent below
+- If `Task` tool is NOT available (Antigravity) → Verify inline
+</runtime_check>
+
+**Subagent path:**
 ```
 Task(
   prompt="Verify phase {phase_number} goal achievement.
@@ -512,6 +535,20 @@ Create VERIFICATION.md.",
   model="{verifier_model}"
 )
 ```
+
+**Inline Verification (Antigravity):**
+Verify the phase goal yourself:
+1. Read the phase goal from `.planning/ROADMAP.md`
+2. Read each PLAN.md's `must_haves` and `requirements_addressed`
+3. For each must_have, verify against actual codebase:
+   - Use `grep_search` to confirm key patterns exist
+   - Use `run_command` to run tests if applicable
+   - Use `view_file` to spot-check critical files
+4. Cross-reference all `phase_req_ids` against plan frontmatter — every ID must appear
+5. Write `{phase_dir}/{padded_phase}-VERIFICATION.md` with:
+   - Status: `passed` or `failed`
+   - For each must_have: verified/not verified + evidence
+   - Requirements coverage: which REQ-IDs are satisfied
 
 Read status:
 ```bash

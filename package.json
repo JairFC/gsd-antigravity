@@ -1,6 +1,6 @@
 {
   "name": "@jairnx/gsd-antigravity",
-  "version": "1.0.0",
+  "version": "0.1.0-beta",
   "description": "GSD (Get Shit Done) optimized for Antigravity — meta-prompting, context engineering and spec-driven development. Based on get-shit-done-cc by TÂCHES.",
   "bin": {
     "gsd-antigravity": "bin/install.js"

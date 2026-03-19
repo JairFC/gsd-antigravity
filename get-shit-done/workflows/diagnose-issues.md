@@ -77,6 +77,12 @@ This runs in parallel - all gaps investigated simultaneously.
 
 For each gap, fill the debug-subagent-prompt template and spawn:
 
+
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Use the Task() call below
+- If `Task` tool is NOT available (Antigravity) → Perform this step inline: debug gaps — read UAT.md and STATE.md, investigate each gap using grep_search and view_file, write fixes directly. Use `view_file`, `grep_search`, `search_web`, `write_to_file`, and `run_command` as needed.
+</runtime_check>
 ```
 Task(
   prompt=filled_debug_subagent_prompt + "\n\n<files_to_read>\n- {phase_dir}/{phase_num}-UAT.md\n- .planning/STATE.md\n</files_to_read>",

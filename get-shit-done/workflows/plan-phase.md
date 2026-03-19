@@ -259,6 +259,13 @@ Write to: {phase_dir}/{phase_num}-RESEARCH.md
 </output>
 ```
 
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Spawn subagent below
+- If `Task` tool is NOT available (Antigravity) → Perform research inline (skip the Task call)
+</runtime_check>
+
+**Subagent path:**
 ```
 Task(
   prompt=research_prompt,
@@ -267,6 +274,14 @@ Task(
   description="Research Phase {phase}"
 )
 ```
+
+**Inline path (Antigravity):**
+Perform the research yourself, sequentially:
+1. Read all files listed in `<files_to_read>` using `view_file`
+2. Use `search_web` (max 3 calls) to research implementation patterns for this phase
+3. If codebase exists, use `grep_search` and `find_by_name` to understand existing patterns
+4. Write `{phase_dir}/{phase_num}-RESEARCH.md` with: Objective, Findings (patterns, libraries, approaches), Risks, Recommendations
+5. **Analysis Paralysis Guard:** Max 5 reads + 3 searches before you must write the file
 
 ### Handle Researcher Return
 
@@ -473,6 +488,13 @@ Every task MUST include these fields — they are NOT optional:
 </quality_gate>
 ```
 
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Spawn planner subagent below
+- If `Task` tool is NOT available (Antigravity) → Create plans inline (skip the Task call)
+</runtime_check>
+
+**Subagent path:**
 ```
 Task(
   prompt=filled_prompt,
@@ -480,6 +502,19 @@ Task(
   model="{planner_model}",
   description="Plan Phase {phase}"
 )
+```
+
+**Inline path (Antigravity):**
+Create the plans yourself using the planner prompt as guidance:
+1. Read all files in `<files_to_read>` using `view_file`
+2. Read the phase prompt template: `~/.gemini/antigravity/get-shit-done/templates/phase-prompt.md`
+3. Decompose the phase into 1-5 plans based on logical task grouping
+4. For each plan, create `{phase_dir}/{padded_phase}-{NN}-PLAN.md` with:
+   - Frontmatter: wave, depends_on, files_modified, requirements_addressed, autonomous
+   - Objective, tasks with `<read_first>`, `<action>`, `<acceptance_criteria>`
+   - Verification criteria and must_haves
+5. Follow all rules from `<deep_work_rules>` — concrete values, no vague references
+6. Assign waves: independent plans = same wave (parallel), dependent plans = higher wave
 ```
 
 ## 9. Handle Planner Return
@@ -526,6 +561,13 @@ Checker prompt:
 </expected_output>
 ```
 
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Spawn checker subagent below
+- If `Task` tool is NOT available (Antigravity) → Verify plans inline (skip the Task call)
+</runtime_check>
+
+**Subagent path:**
 ```
 Task(
   prompt=checker_prompt,
@@ -533,6 +575,19 @@ Task(
   model="{checker_model}",
   description="Verify Phase {phase} plans"
 )
+```
+
+**Inline path (Antigravity):**
+Verify plans yourself:
+1. Read all `*-PLAN.md` files in the phase directory
+2. Check each plan against the verification context:
+   - Are all `phase_req_ids` covered by at least one plan?
+   - Does every task have `<read_first>`, `<action>`, and `<acceptance_criteria>`?
+   - Are acceptance criteria grep-verifiable (not subjective)?
+   - Are wave assignments and dependencies correct?
+3. Cross-check against CONTEXT.md decisions — are user preferences honored?
+4. If issues found: fix them directly in the plan files and note changes
+5. If no issues: report `## VERIFICATION PASSED`
 ```
 
 ## 11. Handle Checker Return
@@ -571,6 +626,14 @@ Return what changed.
 ```
 
 ```
+
+<runtime_check>
+- If `Task` tool is available → Spawn planner subagent with revision prompt
+- If `Task` tool is NOT available (Antigravity) → Revise plans inline
+</runtime_check>
+
+**Subagent path:**
+```
 Task(
   prompt=revision_prompt,
   subagent_type="gsd-planner",
@@ -578,6 +641,13 @@ Task(
   description="Revise Phase {phase} plans"
 )
 ```
+
+**Inline path (Antigravity):**
+Revise plans yourself:
+1. Read the checker issues
+2. Read the existing `*-PLAN.md` files
+3. Make targeted updates to address each issue — don't replan from scratch
+4. Report what changed
 
 After planner returns -> spawn checker again (step 10), increment iteration_count.
 

@@ -88,6 +88,12 @@ padded_phase: {padded_phase}
 
 Omit null file paths.
 
+
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Use the Task() call below
+- If `Task` tool is NOT available (Antigravity) → Perform this step inline: UI audit — read implementation files, evaluate against 6-pillar framework, write audit report directly. Use `view_file`, `grep_search`, `search_web`, `write_to_file`, and `run_command` as needed.
+</runtime_check>
 ```
 Task(
   prompt=ui_audit_prompt,

@@ -574,6 +574,14 @@ Display spawning indicator:
   → Pitfalls research
 ```
 
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Use "Subagent Research" below
+- If `Task` tool is NOT available (Antigravity, Gemini CLI, Codex) → Use "Inline Research" below
+</runtime_check>
+
+### Subagent Research (Task tool available)
+
 Spawn 4 parallel gsd-project-researcher agents with path references:
 
 ```
@@ -753,6 +761,69 @@ Commit after writing.
 ", subagent_type="gsd-research-synthesizer", model="{synthesizer_model}", description="Synthesize research")
 ```
 
+**Skip to "Display research complete banner" →**
+
+---
+
+### Inline Research (Antigravity / no Task tool)
+
+When `Task` tool is unavailable, perform all research sequentially inline.
+This is more token-efficient since no subagent context loading is needed.
+
+**Tools to use:** `search_web` for domain research, `view_file` for project context, `write_to_file` for outputs.
+
+**Analysis Paralysis Guard:** Max 3 search calls per dimension. Write the file, then move to next dimension.
+
+Read `.planning/PROJECT.md` to understand the project domain, then:
+
+**Dimension 1: Stack** → `.planning/research/STACK.md`
+
+Research the standard technology stack for [domain]:
+- Use `search_web` to find current best practices, frameworks, libraries
+- Be prescriptive: specific libraries with versions, rationale for each choice
+- Include what NOT to use and why
+- Write `.planning/research/STACK.md` with sections: Language, Framework, Database, Infrastructure, Key Libraries
+
+**Dimension 2: Features** → `.planning/research/FEATURES.md`
+
+Research what features [domain] products typically have:
+- Categorize: Table stakes (must have) vs Differentiators (competitive advantage) vs Anti-features (deliberately don't build)
+- Note complexity and dependencies between features
+- Write `.planning/research/FEATURES.md`
+
+**Dimension 3: Architecture** → `.planning/research/ARCHITECTURE.md`
+
+Research how [domain] systems are typically structured:
+- Component boundaries (what talks to what)
+- Data flow direction
+- Suggested build order based on dependencies
+- Write `.planning/research/ARCHITECTURE.md`
+
+**Dimension 4: Pitfalls** → `.planning/research/PITFALLS.md`
+
+Research common mistakes in [domain] projects:
+- Specific pitfalls (not generic advice)
+- Warning signs for each
+- Prevention strategies
+- Write `.planning/research/PITFALLS.md`
+
+**Synthesize** → `.planning/research/SUMMARY.md`
+
+Read all 4 research docs, create a synthesis:
+- Key stack recommendation (1-2 sentences)
+- Table stakes features list
+- Architecture recommendation
+- Top 3 pitfalls to watch
+- Write `.planning/research/SUMMARY.md`
+
+**Commit all research:**
+```bash
+git add .planning/research/
+git commit -m "docs: complete project research (4 dimensions + synthesis)"
+```
+
+---
+
 Display research complete banner and key findings:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -923,8 +994,16 @@ Display stage banner:
  GSD ► CREATING ROADMAP
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-◆ Spawning roadmapper...
+◆ Creating roadmap...
 ```
+
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Use "Subagent Roadmap" below
+- If `Task` tool is NOT available (Antigravity, Gemini CLI, Codex) → Use "Inline Roadmap" below
+</runtime_check>
+
+### Subagent Roadmap (Task tool available)
 
 Spawn gsd-roadmapper agent with path references:
 
@@ -954,6 +1033,41 @@ Write files first, then return. This ensures artifacts persist even if context i
 </instructions>
 ", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="Create roadmap")
 ```
+
+**Skip to "Handle roadmapper return" →**
+
+---
+
+### Inline Roadmap (Antigravity / no Task tool)
+
+Create the roadmap directly inline. Read these files first:
+- `.planning/PROJECT.md` — project context
+- `.planning/REQUIREMENTS.md` — v1 requirements
+- `.planning/research/SUMMARY.md` — research findings (if exists)
+- `.planning/config.json` — granularity setting
+
+**Roadmap creation steps:**
+
+1. **Derive phases from requirements** — Group related requirements into logical phases. Don't impose structure; let requirements drive phase boundaries.
+2. **Map every v1 requirement** to exactly one phase. No requirement left unmapped.
+3. **Derive 2-5 success criteria per phase** — Observable user behaviors, not implementation details.
+4. **Validate 100% coverage** — Every REQ-ID appears in exactly one phase.
+5. **Write `.planning/ROADMAP.md`** using the template structure from `templates/roadmap.md`
+6. **Write `.planning/STATE.md`** using the template from `templates/state.md` — set Phase 1 as current
+7. **Update `.planning/REQUIREMENTS.md`** traceability section — map each REQ-ID to its phase
+
+**Granularity guide (from config.json):**
+- `coarse`: 3-5 phases, 1-3 plans each
+- `standard`: 5-8 phases, 3-5 plans each
+- `fine`: 8-12 phases, 5-10 plans each
+
+**Commit:**
+```bash
+git add .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md
+git commit -m "docs: create roadmap ([N] phases)"
+```
+
+---
 
 **Handle roadmapper return:**
 
@@ -1018,7 +1132,7 @@ Use AskUserQuestion:
 
 **If "Adjust phases":**
 - Get user's adjustment notes
-- Re-spawn roadmapper with revision context:
+- **If Task tool available:** Re-spawn roadmapper:
   ```
   Task(prompt="
   <revision>
@@ -1034,6 +1148,7 @@ Use AskUserQuestion:
   </revision>
   ", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="Revise roadmap")
   ```
+- **If Task tool NOT available (Antigravity):** Read `.planning/ROADMAP.md`, apply user's feedback directly using `view_file` and `write_to_file`. Update STATE.md and REQUIREMENTS.md traceability if phase structure changes.
 - Present revised roadmap
 - Loop until user approves
 

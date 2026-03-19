@@ -41,6 +41,12 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 
 ## Step 4: Spawn Researcher
 
+
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Use the Task() call below
+- If `Task` tool is NOT available (Antigravity) → Perform this step inline: phase research — read context files, use search_web for domain research, write RESEARCH.md directly. Use `view_file`, `grep_search`, `search_web`, `write_to_file`, and `run_command` as needed.
+</runtime_check>
 ```
 Task(
   prompt="<objective>

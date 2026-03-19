@@ -130,6 +130,12 @@ padded_phase: {padded_phase}
 
 Omit null file paths from `<files_to_read>`.
 
+
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Use the Task() call below
+- If `Task` tool is NOT available (Antigravity) → Perform this step inline: UI research and UI-SPEC creation — research UI patterns using search_web, create UI-SPEC.md directly. Use `view_file`, `grep_search`, `search_web`, `write_to_file`, and `run_command` as needed.
+</runtime_check>
 ```
 Task(
   prompt=ui_research_prompt,

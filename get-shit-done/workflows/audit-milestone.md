@@ -60,6 +60,12 @@ With phase context collected:
 
 Extract `MILESTONE_REQ_IDS` from REQUIREMENTS.md traceability table — all REQ-IDs assigned to phases in this milestone.
 
+
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Use the Task() call below
+- If `Task` tool is NOT available (Antigravity) → Perform this step inline: cross-phase integration check — read SUMMARY.md files from each phase, check E2E flows and integration points manually. Use `view_file`, `grep_search`, `search_web`, `write_to_file`, and `run_command` as needed.
+</runtime_check>
 ```
 Task(
   prompt="Check cross-phase integration and E2E flows.

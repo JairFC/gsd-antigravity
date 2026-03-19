@@ -84,6 +84,12 @@ Call AskUserQuestion with gap table and options:
 
 ## 5. Spawn gsd-nyquist-auditor
 
+
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Use the Task() call below
+- If `Task` tool is NOT available (Antigravity) → Perform this step inline: Nyquist audit — read PLAN, SUMMARY, implementation files, identify validation gaps, write VALIDATION.md directly. Use `view_file`, `grep_search`, `search_web`, `write_to_file`, and `run_command` as needed.
+</runtime_check>
 ```
 Task(
   prompt="Read ~/.claude/agents/gsd-nyquist-auditor.md for instructions.\n\n" +

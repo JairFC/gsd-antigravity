@@ -372,6 +372,12 @@ Display:
 
 Spawn gsd-planner in --gaps mode:
 
+
+<runtime_check>
+**Check your runtime:**
+- If `Task` tool is available → Use the Task() call below
+- If `Task` tool is NOT available (Antigravity) → Perform this step inline: gap planning and verification — create gap-closure plans inline, verify them directly. Use `view_file`, `grep_search`, `search_web`, `write_to_file`, and `run_command` as needed.
+</runtime_check>
 ```
 Task(
   prompt="""
