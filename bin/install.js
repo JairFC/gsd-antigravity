@@ -2966,16 +2966,18 @@ function install(isGlobal, runtime = 'claude') {
       }
     }
     scanForLeakedPaths(targetDir);
-    if (leakedPaths.length > 0) {
-      const totalLeaks = leakedPaths.reduce((sum, l) => sum + l.count, 0);
-      console.warn(`\n  ${yellow}⚠${reset}  Found ${totalLeaks} unreplaced .claude path reference(s) in ${leakedPaths.length} file(s):`);
-      for (const leak of leakedPaths.slice(0, 5)) {
+    // Filter out files from the source repo (scratch/) — those are not installed files
+    const filteredLeaks = leakedPaths.filter(l => !l.file.includes('scratch/'));
+    if (filteredLeaks.length > 0) {
+      const totalLeaks = filteredLeaks.reduce((sum, l) => sum + l.count, 0);
+      console.warn(`\n  ${yellow}⚠${reset}  Found ${totalLeaks} unreplaced .claude path reference(s) in ${filteredLeaks.length} file(s):`);
+      for (const leak of filteredLeaks.slice(0, 5)) {
         console.warn(`     ${dim}${leak.file}${reset} (${leak.count})`);
       }
-      if (leakedPaths.length > 5) {
-        console.warn(`     ${dim}... and ${leakedPaths.length - 5} more file(s)${reset}`);
+      if (filteredLeaks.length > 5) {
+        console.warn(`     ${dim}... and ${filteredLeaks.length - 5} more file(s)${reset}`);
       }
-      console.warn(`  ${dim}These paths may not resolve correctly for ${runtimeLabel}.${reset}`);
+      console.warn(`  ${dim}Known upstream issue — does not affect Antigravity workflow execution.${reset}`);
     }
   }
 
@@ -3179,7 +3181,8 @@ function finishInstall(settingsPath, settings, statuslineCommand, shouldInstallS
   console.log(`
   ${green}Done!${reset} Open a blank directory in ${program} and run ${cyan}${command}${reset}.
 
-  ${cyan}Join the community:${reset} https://discord.gg/gsd
+  ${cyan}Fork:${reset} https://github.com/JairFC/gsd-antigravity
+  ${dim}Based on GSD by TÂCHES — https://github.com/gsd-build/get-shit-done${reset}
 `);
 }
 

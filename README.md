@@ -2,77 +2,84 @@
 
 # GSD Antigravity
 
-**Fork optimizado de [Get Shit Done](https://github.com/gsd-build/get-shit-done) para [Antigravity](https://deepmind.google/) runtime.**
+**[Get Shit Done](https://github.com/gsd-build/get-shit-done) fork optimized for the [Antigravity](https://deepmind.google/) runtime.**
 
-Meta-prompting, context engineering y spec-driven development — adaptado para las herramientas nativas de Antigravity.
+Meta-prompting, context engineering & spec-driven development — adapted for Antigravity's native tools.
 
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
-[![Based on GSD](https://img.shields.io/badge/based%20on-GSD%20v1.26.0-36BCF7?style=for-the-badge)](https://github.com/gsd-build/get-shit-done)
+[![Based on GSD](https://img.shields.io/badge/based%20on-GSD-36BCF7?style=for-the-badge)](https://github.com/gsd-build/get-shit-done)
+[![npm](https://img.shields.io/npm/v/@jairnx/gsd-antigravity?style=for-the-badge)](https://www.npmjs.com/package/@jairnx/gsd-antigravity)
 
 </div>
 
 ---
 
-## ¿Qué es esto?
+## What is this?
 
-Este es un **fork** del excelente proyecto [Get Shit Done (GSD)](https://github.com/gsd-build/get-shit-done) por **TÂCHES**, modificado y optimizado específicamente para el runtime **Antigravity** de Google DeepMind.
+A **fork** of [Get Shit Done (GSD)](https://github.com/gsd-build/get-shit-done) by **TÂCHES**, modified and optimized for the **Antigravity** runtime by Google DeepMind.
 
-### ¿Por qué un fork?
+### Why a fork?
 
-GSD fue diseñado originalmente para Claude Code, y luego extendido a otros runtimes. Funciona en Antigravity, pero con limitaciones:
+GSD was originally designed for Claude Code and later extended to other runtimes. It works on Antigravity, but with limitations:
 
-- **No tenemos `Task()`** — El mecanismo de subagentes de Claude. En Antigravity todo corre inline.
-- **Tools diferentes** — Antigravity usa `view_file`, `grep_search`, `find_by_name`, `write_to_file`, `run_command` en vez de `Read`, `Write`, `Grep`, `Glob`, `Bash`.
-- **Sin parallelización de agentes** — Los workflows de wave execution corren secuencialmente.
+- **No `Task()` tool** — Claude's subagent mechanism. In Antigravity everything runs inline.
+- **Different tools** — Antigravity uses `view_file`, `grep_search`, `find_by_name`, `write_to_file`, `run_command` instead of `Read`, `Write`, `Grep`, `Glob`, `Bash`.
+- **No agent parallelization** — Wave execution runs sequentially.
 
-Este fork adapta los workflows, agrega plantillas de proyecto, y optimiza las instrucciones para las herramientas nativas de Antigravity.
-
----
-
-## Cambios respecto al upstream
-
-### 🆕 Plantillas de proyecto para stacks comunes
-
-| Template | Stack | Uso |
-|----------|-------|-----|
-| `project-go-microservice.md` | Go + Docker + PostgreSQL + Nginx | Backend APIs, microservicios |
-| `project-network-tool.md` | SSH + SNMP + REST + PostgreSQL | Gestión de red, monitoreo, topology |
-| `project-infrastructure.md` | Docker Compose + Nginx + Backup | DevOps, configuración de VPS |
-
-### 🔧 `map-codebase` optimizado para Antigravity
-
-- Estrategias de exploración usando `view_file`, `grep_search`, `find_by_name`, `list_dir` 
-- Patrones de búsqueda para Go, Docker, y networking
-- Analysis Paralysis Guard (máx 5 lecturas antes de escribir)
-- Reglas de calidad de documentos (40-120 líneas por doc)
-
-### ⚡ `quick.md` con ejecución inline
-
-- Detección automática de runtime (Task vs inline)
-- **Step 5-ALT** completo: gather → analyze → plan → execute → verify — todo inline
-- Plan template con formato XML listo para usar
-- Deviation rules y self-check protocol incluidos
-- Elimina el overhead de 3 rondas de subagentes
+This fork adapts all 13 Task()-dependent workflows with inline fallbacks, adds project templates, and optimizes instructions for Antigravity's native tools.
 
 ---
 
-## Instalación
+## Changes from upstream
 
-### Un comando (recomendado)
+### ⚡ All 13 Task()-dependent workflows adapted
+
+Every workflow that uses `Task()` subagents now has a `<runtime_check>` block with inline execution instructions for Antigravity:
+
+**Core workflows (detailed inline paths):**
+
+| Workflow | Task() calls | What was added |
+|----------|-------------|----------------|
+| `new-project` | 7 | Inline research (4 dimensions + synthesis) + inline roadmap |
+| `plan-phase` | 4 | Inline researcher, planner, plan-checker, revision loop |
+| `execute-phase` | 3 | Sequential inline execution + inline verification |
+| `quick` | 6 | Full Step 5-ALT with inline gather → plan → execute → verify |
+| `map-codebase` | 4 | Antigravity tool strategies + Analysis Paralysis Guard |
+
+**Secondary workflows (runtime check + inline guidance):**
+`audit-milestone`, `diagnose-issues`, `new-milestone`, `research-phase`, `ui-phase`, `ui-review`, `validate-phase`, `verify-work`
+
+### 🆕 Project templates
+
+| Template | Stack | Use case |
+|----------|-------|----------|
+| `project-go-microservice.md` | Go + Docker + PostgreSQL + Nginx | Backend APIs, microservices |
+| `project-network-tool.md` | SSH + SNMP + REST + PostgreSQL | Network management, monitoring |
+| `project-infrastructure.md` | Docker Compose + Nginx + Backup | DevOps, VPS configuration |
+
+### 🔧 Installer rebranded
+
+- Banner shows "GSD Antigravity" with TÂCHES attribution
+- Default runtime: Antigravity (not Claude)
+- All `npx` references point to `@jairnx/gsd-antigravity`
+
+---
+
+## Install
+
+### One command (recommended)
 
 ```bash
 npx @jairnx/gsd-antigravity --antigravity --global
 ```
 
-Eso es todo. Instala GSD optimizado para Antigravity en `~/.gemini/antigravity/`.
-
-### Actualizar
+### Update
 
 ```bash
 npx @jairnx/gsd-antigravity@latest --antigravity --global
 ```
 
-### Desde el repo (desarrollo)
+### From repo (development)
 
 ```bash
 git clone https://github.com/JairFC/gsd-antigravity.git
@@ -82,53 +89,37 @@ node bin/install.js --antigravity --global
 
 ---
 
-## Uso
+## Usage
 
-Todos los comandos GSD estándar funcionan:
+All standard GSD commands work:
 
 ```
-/gsd-new-project          # Iniciar proyecto nuevo
-/gsd-map-codebase         # Mapear codebase existente
-/gsd-discuss-phase 1      # Discutir fase
-/gsd-plan-phase 1         # Planificar fase
-/gsd-execute-phase 1      # Ejecutar fase
-/gsd-quick                # Tarea rápida ad-hoc
-/gsd-progress             # Ver estado actual
-/gsd-help                 # Ver todos los comandos
+/gsd-new-project          # Initialize new project
+/gsd-map-codebase         # Map existing codebase
+/gsd-discuss-phase 1      # Discuss phase
+/gsd-plan-phase 1         # Plan phase
+/gsd-execute-phase 1      # Execute phase
+/gsd-quick                # Quick ad-hoc task
+/gsd-progress             # Check current status
+/gsd-help                 # Show all commands
 ```
 
-> **Nota:** En Antigravity los comandos usan formato `/gsd-command` (con guión) en vez de `/gsd:command` (con dos puntos).
+For full GSD documentation, see the [original README](https://github.com/gsd-build/get-shit-done).
 
 ---
 
-## Documentación original
+## Credits
 
-Para la documentación completa del sistema GSD, consulta el [README original](https://github.com/gsd-build/get-shit-done) y la [Guía de Usuario](docs/USER-GUIDE.md).
+This is a **fork** of [Get Shit Done](https://github.com/gsd-build/get-shit-done), created by **[TÂCHES](https://github.com/glittercowboy)** (Lex Christopherson).
 
-### Conceptos clave de GSD
+The original meta-prompting, context engineering, and spec-driven development system was designed and implemented by TÂCHES. This fork only adapts and optimizes specific components for the Antigravity runtime.
 
-- **Context Engineering** — Archivos estructurados que dan al AI todo el contexto necesario
-- **Wave Execution** — Plans paralelos agrupados por dependencias
-- **Atomic Commits** — Un commit por tarea, historial limpio
-- **Deviation Rules** — Qué hacer cuando algo se desvía del plan
-- **Analysis Paralysis Guard** — Forzar progreso cuando hay demasiada investigación
-
----
-
-## Créditos
-
-Este proyecto es un **fork** de [Get Shit Done](https://github.com/gsd-build/get-shit-done), creado por **[TÂCHES](https://github.com/glittercowboy)** (Lex Christopherson).
-
-El sistema original de meta-prompting, context engineering, y spec-driven development fue diseñado e implementado por TÂCHES. Este fork solo adapta y optimiza componentes específicos para el runtime Antigravity.
-
-**Licencia:** MIT — Ver [LICENSE](LICENSE) para detalles.
+**License:** MIT — See [LICENSE](LICENSE) for details.
 
 ---
 
 <div align="center">
 
-**Antigravity es poderoso. GSD lo hace confiable.**
-
-*Fork mantenido por [JairFC](https://github.com/JairFC)*
+*Fork maintained by [JairFC](https://github.com/JairFC)*
 
 </div>
