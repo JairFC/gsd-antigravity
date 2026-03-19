@@ -776,6 +776,97 @@ function cmdInitProgress(cwd, raw) {
   output(result, raw);
 }
 
+function cmdInitUiWatch(cwd, phase, raw) {
+  if (!phase) {
+    error('phase required for init ui-watch');
+  }
+
+  const config = loadConfig(cwd);
+  const phaseInfo = findPhaseInternal(cwd, phase);
+
+  // Detect UI-SPEC and existing watch report in the phase directory
+  let uiSpecPath = null;
+  let watchReportPath = null;
+  let hasUiSpec = false;
+  let hasWatchReport = false;
+
+  if (phaseInfo?.directory) {
+    const phaseDirFull = path.join(cwd, phaseInfo.directory);
+    try {
+      const files = fs.readdirSync(phaseDirFull);
+      const uiSpecFile = files.find(f => f.endsWith('-UI-SPEC.md') || f === 'UI-SPEC.md');
+      if (uiSpecFile) {
+        hasUiSpec = true;
+        uiSpecPath = toPosixPath(path.join(phaseInfo.directory, uiSpecFile));
+      }
+      const watchReportFile = files.find(f => f.endsWith('-UI-WATCH-REPORT.md') || f === 'UI-WATCH-REPORT.md');
+      if (watchReportFile) {
+        hasWatchReport = true;
+        watchReportPath = toPosixPath(path.join(phaseInfo.directory, watchReportFile));
+      }
+    } catch { /* intentionally empty */ }
+  }
+
+  // Detect dev port and dev command from common config files
+  let devPort = 3000;
+  let devCommand = 'npm run dev';
+  try {
+    const pkgPath = path.join(cwd, 'package.json');
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      // Detect common Next.js / Vite / CRA ports from scripts
+      const devScript = pkg.scripts?.dev || pkg.scripts?.start || '';
+      if (devScript.includes('--port')) {
+        const portMatch = devScript.match(/--port[= ](\d+)/);
+        if (portMatch) devPort = parseInt(portMatch[1], 10);
+      } else if (devScript.includes('5173')) {
+        devPort = 5173; // Vite default
+      } else if (devScript.includes('8000')) {
+        devPort = 8000;
+      }
+      // Determine exact dev command
+      if (pkg.scripts?.dev) devCommand = 'npm run dev';
+      else if (pkg.scripts?.start) devCommand = 'npm start';
+    }
+  } catch { /* intentionally empty */ }
+
+  const result = {
+    // Config
+    commit_docs: config.commit_docs,
+
+    // Phase info
+    phase_found: !!phaseInfo,
+    phase_dir: phaseInfo?.directory || null,
+    phase_number: phaseInfo?.phase_number || null,
+    phase_name: phaseInfo?.phase_name || null,
+    phase_slug: phaseInfo?.phase_slug || null,
+    padded_phase: phaseInfo?.phase_number ? normalizePhaseName(phaseInfo.phase_number) : null,
+
+    // UI artifacts
+    has_ui_spec: hasUiSpec,
+    ui_spec_path: uiSpecPath,
+    has_watch_report: hasWatchReport,
+    watch_report_path: watchReportPath,
+
+    // Dev server info
+    dev_port: devPort,
+    dev_command: devCommand,
+    dev_url: `http://localhost:${devPort}`,
+
+    // Project root
+    project_root: cwd,
+
+    // File existence
+    planning_exists: pathExistsInternal(cwd, '.planning'),
+    roadmap_exists: pathExistsInternal(cwd, '.planning/ROADMAP.md'),
+
+    // Paths
+    state_path: '.planning/STATE.md',
+  };
+
+  output(result, raw);
+}
+
 module.exports = {
   cmdInitExecutePhase,
   cmdInitPlanPhase,
@@ -789,4 +880,5 @@ module.exports = {
   cmdInitMilestoneOp,
   cmdInitMapCodebase,
   cmdInitProgress,
+  cmdInitUiWatch,
 };

@@ -127,6 +127,7 @@
  *   init milestone-op                  All context for milestone operations
  *   init map-codebase                  All context for map-codebase workflow
  *   init progress                      All context for progress workflow
+ *   init ui-watch <phase>              All context for ui-watch workflow (Antigravity only)
  */
 
 const fs = require('fs');
@@ -594,8 +595,11 @@ async function main() {
         case 'progress':
           init.cmdInitProgress(cwd, raw);
           break;
+        case 'ui-watch':
+          init.cmdInitUiWatch(cwd, args[2], raw);
+          break;
         default:
-          error(`Unknown init workflow: ${workflow}\nAvailable: execute-phase, plan-phase, new-project, new-milestone, quick, resume, verify-work, phase-op, todos, milestone-op, map-codebase, progress`);
+          error(`Unknown init workflow: ${workflow}\nAvailable: execute-phase, plan-phase, new-project, new-milestone, quick, resume, verify-work, phase-op, todos, milestone-op, map-codebase, progress, ui-watch`);
       }
       break;
     }
