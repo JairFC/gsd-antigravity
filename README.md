@@ -58,28 +58,25 @@ Este fork adapta los workflows, agrega plantillas de proyecto, y optimiza las in
 
 ## Instalación
 
-### Desde este fork (desarrollo)
+### Un comando (recomendado)
 
 ```bash
-git clone https://github.com/JairFC/gsd-antigravity.git
-cd gsd-antigravity
-node bin/install.js --antigravity --global
+npx @jairnx/gsd-antigravity --antigravity --global
 ```
+
+Eso es todo. Instala GSD optimizado para Antigravity en `~/.gemini/antigravity/`.
 
 ### Actualizar
 
 ```bash
-cd gsd-antigravity
-git pull origin main
-node bin/install.js --antigravity --global
+npx @jairnx/gsd-antigravity@latest --antigravity --global
 ```
 
-### Sincronizar con upstream
+### Desde el repo (desarrollo)
 
 ```bash
-git fetch upstream
-git merge upstream/main
-# Resolver conflictos si los hay
+git clone https://github.com/JairFC/gsd-antigravity.git
+cd gsd-antigravity
 node bin/install.js --antigravity --global
 ```
 
