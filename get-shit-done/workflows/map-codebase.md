@@ -211,30 +211,121 @@ Continue to verify_output.
 <step name="sequential_mapping" condition="Task tool is NOT available (e.g. Antigravity, Gemini CLI, Codex)">
 When the `Task` tool is unavailable, perform codebase mapping sequentially in the current context. This replaces `spawn_agents` and `collect_confirmations`.
 
-**IMPORTANT:** Do NOT use `browser_subagent`, `Explore`, or any browser-based tool. Use only file system tools (Read, Bash, Write, Grep, Glob, list_dir, view_file, grep_search, or equivalent tools available in your runtime).
+**IMPORTANT:** Do NOT use `browser_subagent`, `Explore`, or any browser-based tool. Use only file system tools available in your runtime.
+
+**Antigravity-specific tools (preferred order):**
+- `list_dir` — Directory structure exploration (fast, recursive counts)
+- `find_by_name` — Find files by pattern/extension (supports glob, max 50 results)
+- `grep_search` — Search file contents with ripgrep (fast, JSON output)
+- `view_file` — Read file contents with line numbers (up to 800 lines)
+- `run_command` — Execute shell commands for complex analysis (wc, head, jq, etc.)
+
+**Anti-pattern:** Do NOT read every file. Use `find_by_name` + `grep_search` to locate key files, then `view_file` only the important ones.
+
+**Analysis Paralysis Guard:** If you've made 5+ consecutive read/search calls without writing anything — STOP. Write what you have so far, then continue exploring for remaining docs.
 
 Perform all 4 mapping passes sequentially:
 
-**Pass 1: Tech Focus**
-- Explore package.json/Cargo.toml/go.mod/requirements.txt, config files, dependency trees
-- Write `.planning/codebase/STACK.md` — Languages, runtime, frameworks, dependencies, configuration
-- Write `.planning/codebase/INTEGRATIONS.md` — External APIs, databases, auth providers, webhooks
+**Pass 1: Tech Focus** → STACK.md + INTEGRATIONS.md
 
-**Pass 2: Architecture Focus**
-- Explore directory structure, entry points, module boundaries, data flow
-- Write `.planning/codebase/ARCHITECTURE.md` — Pattern, layers, data flow, abstractions, entry points
-- Write `.planning/codebase/STRUCTURE.md` — Directory layout, key locations, naming conventions
+Exploration strategy:
+```
+# 1. Identify language/framework
+find_by_name: go.mod, package.json, Cargo.toml, requirements.txt, pyproject.toml
+find_by_name: Dockerfile, docker-compose.yml, docker-compose*.yml
+find_by_name: Makefile, Taskfile.yml, justfile
 
-**Pass 3: Quality Focus**
-- Explore code style, error handling patterns, test files, CI config
-- Write `.planning/codebase/CONVENTIONS.md` — Code style, naming, patterns, error handling
-- Write `.planning/codebase/TESTING.md` — Framework, structure, mocking, coverage
+# 2. Read dependency files
+view_file: go.mod (Go deps), package.json (Node deps), requirements.txt (Python deps)
 
-**Pass 4: Concerns Focus**
-- Explore TODOs, known issues, fragile areas, security patterns
-- Write `.planning/codebase/CONCERNS.md` — Tech debt, bugs, security, performance, fragile areas
+# 3. Find config files
+find_by_name: *.env*, *.toml, *.yaml, *.yml (MaxDepth: 2)
+find_by_name: nginx.conf, prometheus.yml, grafana*.json
 
-Use the same document templates as the `gsd-codebase-mapper` agent. Include actual file paths formatted with backticks.
+# 4. Find integrations
+grep_search: "database", "postgres", "mysql", "redis", "mongo" in config files
+grep_search: "api.telegram", "webhook", "oauth", "smtp" across codebase
+grep_search: "ssh.Dial", "gosnmp", "snmp", "net.Dial" for network integrations
+```
+
+Write `.planning/codebase/STACK.md` and `.planning/codebase/INTEGRATIONS.md`
+
+**Pass 2: Architecture Focus** → ARCHITECTURE.md + STRUCTURE.md
+
+Exploration strategy:
+```
+# 1. Map top-level structure
+list_dir: project root
+list_dir: cmd/, src/, internal/, pkg/, app/, lib/ (whichever exist)
+
+# 2. Find entry points
+find_by_name: main.go, main.py, index.ts, index.js, server.go
+grep_search: "func main()" or "if __name__" or "createServer"
+
+# 3. Find routing/handlers
+grep_search: "HandleFunc", "router.", "app.Get", "app.Post", "@app.route"
+grep_search: "http.Handler", "gin.Context", "fiber.Ctx", "chi.Router"
+
+# 4. Find data flow
+grep_search: "repository", "service", "handler", "middleware", "controller"
+find_by_name: *repository*, *service*, *handler*, *middleware*
+```
+
+Write `.planning/codebase/ARCHITECTURE.md` and `.planning/codebase/STRUCTURE.md`
+
+**Pass 3: Quality Focus** → CONVENTIONS.md + TESTING.md
+
+Exploration strategy:
+```
+# 1. Check code style
+find_by_name: .golangci.yml, .eslintrc*, .prettierrc*, .editorconfig
+view_file: first 100 lines of 2-3 representative source files
+
+# 2. Find test infrastructure
+find_by_name: *_test.go, *.test.ts, *.spec.ts, test_*.py (count them)
+find_by_name: testdata/, fixtures/, __mocks__/
+grep_search: "func Test", "describe(", "it(", "def test_"
+
+# 3. Check CI/CD
+find_by_name: .github/workflows/*.yml, .gitlab-ci.yml, Jenkinsfile
+view_file: CI config files
+
+# 4. Error handling patterns
+grep_search: "if err != nil", "try {", "catch", "except", ".catch("
+grep_search: "log.Fatal", "log.Error", "slog.", "zerolog", "zap."
+```
+
+Write `.planning/codebase/CONVENTIONS.md` and `.planning/codebase/TESTING.md`
+
+**Pass 4: Concerns Focus** → CONCERNS.md
+
+Exploration strategy:
+```
+# 1. Find TODOs and known issues
+grep_search: "TODO", "FIXME", "HACK", "XXX", "WORKAROUND"
+
+# 2. Security scan
+grep_search: "password", "secret", "token", "api_key" (check if hardcoded)
+grep_search: "InsecureSkipVerify", "nosec", "nolint", "# noqa"
+find_by_name: .env (should be gitignored, check .gitignore)
+
+# 3. Performance concerns
+grep_search: "time.Sleep", "sync.Mutex", "goroutine", "go func"
+grep_search: "SELECT *", "N+1", "unbounded", "no limit"
+
+# 4. Tech debt indicators
+run_command: git log --oneline -20 (recent activity pattern)
+run_command: wc -l across key files (identify oversized files)
+find_by_name: *deprecated*, *legacy*, *old*, *backup*
+```
+
+Write `.planning/codebase/CONCERNS.md`
+
+**Document quality rules:**
+- Always include actual file paths with backticks: `src/handlers/auth.go`
+- Include code snippets for patterns (3-5 lines max)
+- Prioritize actionable information over exhaustive listing
+- Each document should be 40-120 lines (enough to be useful, not overwhelming)
 
 Continue to verify_output.
 </step>
