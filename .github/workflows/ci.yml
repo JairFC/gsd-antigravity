@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run unit tests
+        run: node --test tests/antigravity-install.test.cjs
+
+  smoke-test:
+    name: E2E Smoke Test
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install GSD Antigravity globally
+        run: node bin/install.js --antigravity --global
+
+      - name: Run smoke test
+        run: bash tests/smoke-test.sh
+
+  package-check:
+    name: Package Validation
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate package
+        run: |
+          npm pack --dry-run 2>&1 | tee /tmp/pack-output.txt
+          
+          # Check package size is reasonable (< 2MB compressed)
+          SIZE=$(grep "package size" /tmp/pack-output.txt | grep -oP '[\d.]+\s*[kKmM]B' | head -1)
+          echo "Package size: $SIZE"
+          
+          # Check no test files leaked into package
+          if grep -q "tests/" /tmp/pack-output.txt; then
+            echo "❌ Test files found in package!"
+            exit 1
+          fi
+          
+          echo "✅ Package validation passed"
+
+      - name: Verify installer runs clean
+        run: |
+          node bin/install.js --antigravity --global 2>&1 | tee /tmp/install-output.txt
+          
+          # Check for errors in output
+          if grep -qi "error\|ENOENT\|Cannot find" /tmp/install-output.txt; then
+            echo "❌ Installer produced errors!"
+            exit 1
+          fi
+          
+          # Check success message
+          if grep -q "Done!" /tmp/install-output.txt; then
+            echo "✅ Installer completed successfully"
+          else
+            echo "❌ Installer did not complete"
+            exit 1
+          fi

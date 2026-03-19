@@ -6,6 +6,7 @@
 
 Meta-prompting, context engineering & spec-driven development — adapted for Antigravity's native tools.
 
+[![CI](https://github.com/JairFC/gsd-antigravity/actions/workflows/ci.yml/badge.svg)](https://github.com/JairFC/gsd-antigravity/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 [![Based on GSD](https://img.shields.io/badge/based%20on-GSD-36BCF7?style=for-the-badge)](https://github.com/gsd-build/get-shit-done)
 [![npm](https://img.shields.io/npm/v/@jairnx/gsd-antigravity?style=for-the-badge)](https://www.npmjs.com/package/@jairnx/gsd-antigravity)
