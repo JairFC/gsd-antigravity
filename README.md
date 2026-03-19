@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src=".github/banner.png" alt="GSD Antigravity" width="640">
+
 # GSD Antigravity
 
 **[Get Shit Done](https://github.com/gsd-build/get-shit-done) fork optimized for the [Antigravity](https://deepmind.google/) runtime.**
