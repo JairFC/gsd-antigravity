@@ -113,7 +113,7 @@ Please install a Linux-native Node.js inside WSL:
   curl -fsSL https://fnm.vercel.app/install | bash
   fnm install --lts
 
-Then re-run: npx get-shit-done-cc@latest
+Then re-run: npx @jairnx/gsd-antigravity@latest
 `);
     process.exit(1);
   }
@@ -271,9 +271,9 @@ const banner = '\n' +
   '  ╚██████╔╝███████║██████╔╝\n' +
   '   ╚═════╝ ╚══════╝╚═════╝' + reset + '\n' +
   '\n' +
-  '  Get Shit Done ' + dim + 'v' + pkg.version + reset + '\n' +
-  '  A meta-prompting, context engineering and spec-driven\n' +
-  '  development system for Claude Code, OpenCode, Gemini, Codex, Copilot, Antigravity, and Cursor by TÂCHES.\n';
+  '  GSD Antigravity ' + dim + 'v' + pkg.version + reset + '\n' +
+  '  Meta-prompting & context engineering for Antigravity.\n' +
+  dim + '  Based on Get Shit Done by TÂCHES — github.com/gsd-build/get-shit-done' + reset + '\n';
 
 // Parse --config-dir argument
 function parseConfigDirArg() {
@@ -311,7 +311,7 @@ if (hasUninstall) {
 
 // Show help if requested
 if (hasHelp) {
-  console.log(`  ${yellow}Usage:${reset} npx get-shit-done-cc [options]\n\n  ${yellow}Options:${reset}\n    ${cyan}-g, --global${reset}              Install globally (to config directory)\n    ${cyan}-l, --local${reset}               Install locally (to current directory)\n    ${cyan}--claude${reset}                  Install for Claude Code only\n    ${cyan}--opencode${reset}                Install for OpenCode only\n    ${cyan}--gemini${reset}                  Install for Gemini only\n    ${cyan}--codex${reset}                   Install for Codex only\n    ${cyan}--copilot${reset}                 Install for Copilot only\n    ${cyan}--antigravity${reset}             Install for Antigravity only\n    ${cyan}--cursor${reset}                  Install for Cursor only\n    ${cyan}--all${reset}                     Install for all runtimes\n    ${cyan}-u, --uninstall${reset}           Uninstall GSD (remove all GSD files)\n    ${cyan}-c, --config-dir <path>${reset}   Specify custom config directory\n    ${cyan}-h, --help${reset}                Show this help message\n    ${cyan}--force-statusline${reset}        Replace existing statusline config\n\n  ${yellow}Examples:${reset}\n    ${dim}# Interactive install (prompts for runtime and location)${reset}\n    npx get-shit-done-cc\n\n    ${dim}# Install for Claude Code globally${reset}\n    npx get-shit-done-cc --claude --global\n\n    ${dim}# Install for Gemini globally${reset}\n    npx get-shit-done-cc --gemini --global\n\n    ${dim}# Install for Codex globally${reset}\n    npx get-shit-done-cc --codex --global\n\n    ${dim}# Install for Copilot globally${reset}\n    npx get-shit-done-cc --copilot --global\n\n    ${dim}# Install for Copilot locally${reset}\n    npx get-shit-done-cc --copilot --local\n\n    ${dim}# Install for Antigravity globally${reset}\n    npx get-shit-done-cc --antigravity --global\n\n    ${dim}# Install for Antigravity locally${reset}\n    npx get-shit-done-cc --antigravity --local\n\n    ${dim}# Install for Cursor globally${reset}\n    npx get-shit-done-cc --cursor --global\n\n    ${dim}# Install for Cursor locally${reset}\n    npx get-shit-done-cc --cursor --local\n\n    ${dim}# Install for all runtimes globally${reset}\n    npx get-shit-done-cc --all --global\n\n    ${dim}# Install to custom config directory${reset}\n    npx get-shit-done-cc --codex --global --config-dir ~/.codex-work\n\n    ${dim}# Install to current project only${reset}\n    npx get-shit-done-cc --claude --local\n\n    ${dim}# Uninstall GSD from Cursor globally${reset}\n    npx get-shit-done-cc --cursor --global --uninstall\n\n  ${yellow}Notes:${reset}\n    The --config-dir option is useful when you have multiple configurations.\n    It takes priority over CLAUDE_CONFIG_DIR / GEMINI_CONFIG_DIR / CODEX_HOME / COPILOT_CONFIG_DIR / ANTIGRAVITY_CONFIG_DIR / CURSOR_CONFIG_DIR environment variables.\n`);
+  console.log(`  ${yellow}Usage:${reset} npx @jairnx/gsd-antigravity [options]\n\n  ${yellow}Options:${reset}\n    ${cyan}-g, --global${reset}              Install globally (to config directory)\n    ${cyan}-l, --local${reset}               Install locally (to current directory)\n    ${cyan}--antigravity${reset}             Install for Antigravity (default)\n    ${cyan}--claude${reset}                  Install for Claude Code\n    ${cyan}--opencode${reset}                Install for OpenCode\n    ${cyan}--gemini${reset}                  Install for Gemini CLI\n    ${cyan}--codex${reset}                   Install for Codex\n    ${cyan}--copilot${reset}                 Install for Copilot\n    ${cyan}--cursor${reset}                  Install for Cursor\n    ${cyan}--all${reset}                     Install for all runtimes\n    ${cyan}-u, --uninstall${reset}           Uninstall GSD\n    ${cyan}-c, --config-dir <path>${reset}   Custom config directory\n    ${cyan}-h, --help${reset}                Show this help\n\n  ${yellow}Examples:${reset}\n    ${dim}# Antigravity global (recommended)${reset}\n    npx @jairnx/gsd-antigravity --antigravity --global\n\n    ${dim}# Antigravity local (current project)${reset}\n    npx @jairnx/gsd-antigravity --antigravity --local\n\n    ${dim}# Other runtimes${reset}\n    npx @jairnx/gsd-antigravity --claude --global\n    npx @jairnx/gsd-antigravity --gemini --global\n    npx @jairnx/gsd-antigravity --all --global\n\n    ${dim}# Uninstall${reset}\n    npx @jairnx/gsd-antigravity --antigravity --global --uninstall\n`);
   process.exit(0);
 }
 
@@ -3431,13 +3431,13 @@ if (hasGlobal && hasLocal) {
     installAllRuntimes(selectedRuntimes, hasGlobal, false);
   }
 } else if (hasGlobal || hasLocal) {
-  // Default to Claude if no runtime specified but location is
-  installAllRuntimes(['claude'], hasGlobal, false);
+  // Default to Antigravity if no runtime specified but location is
+  installAllRuntimes(['antigravity'], hasGlobal, false);
 } else {
   // Interactive
   if (!process.stdin.isTTY) {
-    console.log(`  ${yellow}Non-interactive terminal detected, defaulting to Claude Code global install${reset}\n`);
-    installAllRuntimes(['claude'], true, false);
+    console.log(`  ${yellow}Non-interactive terminal detected, defaulting to Antigravity global install${reset}\n`);
+    installAllRuntimes(['antigravity'], true, false);
   } else {
     promptRuntime((runtimes) => {
       promptLocation(runtimes);
