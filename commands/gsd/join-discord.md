@@ -1,18 +1,20 @@
 ---
 name: gsd:join-discord
-description: Join the GSD Discord community
+description: Join the GSD community and find the Antigravity fork
 ---
 
 <objective>
-Display the Discord invite link for the GSD community server.
+Display community links for GSD Antigravity.
 </objective>
 
 <output>
-# Join the GSD Discord
+# GSD Antigravity — Community
 
-Connect with other GSD users, get help, share what you're building, and stay updated.
+**Fork repo:** https://github.com/JairFC/gsd-antigravity
+Report issues, contribute, or star the project.
 
-**Invite link:** https://discord.gg/gsd
+**Original GSD Discord:** https://discord.gg/gsd
+Connect with the broader GSD community (by TÂCHES).
 
-Click the link or paste it into your browser to join.
+**Original GSD repo:** https://github.com/gsd-build/get-shit-done
 </output>
